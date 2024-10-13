@@ -1,19 +1,19 @@
 {
   "builds": [
     {
-      "src": "pages/api/rust/src/main.rs",
+      "src": "pages/api/main.rs", // Updated path
       "use": "@vercel/rust"
     }
   ],
   "routes": [
     {
-      "src": "/api/rust/(?<video_id>[^/]+)",
-      "dest": "/api/rust/src/main.rs"
+      "src": "/api/(?<video_id>[^/]+)", // Updated route
+      "dest": "/api/main.rs" // Updated destination
     },
     {
-      "src": "/(.*)", 
+      "src": "/(.*)",
       "headers": { "cache-control": "public, max-age=3600, immutable" },
-      "dest": "/$1"  // Serve files from the root directory
+      "dest": "/$1"
     }
   ]
 }
