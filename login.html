@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approvideo - Login</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color:    #f0f8ff; /* Light blue background */
+            margin: 0;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        input[type="email"] {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 10px 0;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #4CAF50; /* Green */
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration:    none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 0;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .background    {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: url('nile-river-sunset.jpg'); /* Replace with your image */
+            background-size: cover;
+            filter: blur(5px); /* Add a blur effect */
+        }
+
+        .music-icon {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-size: 24px;
+            color: #333;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    <div class="container">
+        <h2>Welcome to Approvideo!</h2>
+        <p>Login with your email to explore the community.</p>
+        <input type="email" id="email" placeholder="Enter your email" required>
+        <button onclick="handleLogin()">Send Magic Link</button>
+        <span id="message"></span>
+    </div>
+    <span class="music-icon" onclick="toggleMusic()">
+        <i id="music-icon" class="fas fa-music"></i>
+    </span>
+
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'YOUR_SUPABASE_URL';
+        const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
+        const supabase = new SupabaseClient(supabaseUrl, supabaseKey);
+
+        async function handleLogin() {
+            const email = (document.getElementById('email') as HTMLInputElement).value;
+            const { error } = await supabase.auth.signInWithOtp({ email });
+            if (error) {
+                document.getElementById('message').textContent = error.message;
+            } else {
+                document.getElementById('message').textContent = 'Check your email for the magic link!';
+            }
+        }
+
+        function toggleMusic() {
+            // Placeholder for music toggle functionality
+            // You can use the Web Audio API or a library like Howler.js to implement this
+            const icon = document.getElementById('music-icon');
+            if (icon.classList.contains('fa-music')) {
+                icon.classList.remove('fa-music');
+                icon.classList.add('fa-volume-mute');
+                // Pause music here
+            } else {
+                icon.classList.remove('fa-volume-mute');
+                icon.classList.add('fa-music');
+                // Play music here
+            }
+        }
+    </script>
+</body>
+</html>
