@@ -1,0 +1,227 @@
+Eco Ops NFT Minting Schedule API** and how it works step-by-step. This API will allow users to query which blockchain is minting NFTs on any given date and provide details for the current, next, and following week.
+
+### 1. **API Overview:**
+The API will:
+- **Respond to date queries** with the current minting blockchain.
+- **Cycle through 14 blockchains** every four days.
+- **Provide schedule for the current day**, the next week, and the following week.
+
+### 2. **Endpoints**:
+- **GET `/api/minting-schedule/today`**: Returns the current minting blockchain for today.
+- **GET `/api/minting-schedule/{date}`**: Returns the minting blockchain for the specified date.
+- **GET `/api/minting-schedule/next-week`**: Returns the minting blockchain for next week and the following week from today.
+
+---
+
+### 3. **API Detailed Design**:
+
+#### Example API Structure in Go:
+
+**Directory structure:**
+```
+eco-ops-api/
+├── main.go
+└── handlers/
+    └── schedule_handlers.go
+```
+
+---
+
+#### **Step 1: main.go**
+
+This is the entry point of the Go API server that routes the requests:
+
+```go
+package main
+
+import (
+    "log"
+    "net/http"
+    "github.com/gorilla/mux"
+    "eco-ops-api/handlers"
+)
+
+func main() {
+    // Create a new router
+    r := mux.NewRouter()
+
+    // Route for today's schedule
+    r.HandleFunc("/api/minting-schedule/today", handlers.GetTodayMintingSchedule).Methods("GET")
+
+    // Route for minting schedule based on a specific date
+    r.HandleFunc("/api/minting-schedule/{date}", handlers.GetMintingScheduleForDate).Methods("GET")
+
+    // Route for minting schedule for next week and the week after
+    r.HandleFunc("/api/minting-schedule/next-week", handlers.GetMintingScheduleForNextWeek).Methods("GET")
+
+    // Start the server
+    log.Println("Starting server on port 8080...")
+    log.Fatal(http.ListenAndServe(":8080", r))
+}
+```
+
+---
+
+#### **Step 2: schedule_handlers.go**
+
+This file contains the logic for calculating the minting schedule based on the date queried:
+
+```go
+package handlers
+
+import (
+    "encoding/json"
+    "fmt"
+    "net/http"
+    "time"
+    "github.com/gorilla/mux"
+)
+
+// Define the 14 blockchains we will cycle through
+var blockchains = [14]string{
+    "Blockchain 1", "Blockchain 2", "Blockchain 3", "Blockchain 4",
+    "Blockchain 5", "Blockchain 6", "Blockchain 7", "Blockchain 8",
+    "Blockchain 9", "Blockchain 10", "Blockchain 11", "Blockchain 12",
+    "Blockchain 13", "Blockchain 14",
+}
+
+// Structure for returning schedule responses
+type MintingScheduleResponse struct {
+    Date       string `json:"date"`
+    Blockchain string `json:"blockchain"`
+}
+
+// Helper function to calculate the blockchain for a given date
+func getBlockchainForDate(date time.Time) string {
+    // Start date of the cycle
+    startDate := time.Date(2024, time.January, 1, 0, 0, 0, 0, time.UTC)
+    
+    // Calculate days since the start
+    daysSinceStart := int(date.Sub(startDate).Hours() / 24)
+    
+    // Determine blockchain (cycle every 4 days through 14 blockchains)
+    blockchainIndex := (daysSinceStart / 4) % 14
+    
+    // Return the blockchain at the calculated index
+    return blockchains[blockchainIndex]
+}
+
+// Handler for today's minting schedule
+func GetTodayMintingSchedule(w http.ResponseWriter, r *http.Request) {
+    today := time.Now()
+    response := MintingScheduleResponse{
+        Date:       today.Format("Jan 2, 2006"),
+        Blockchain: getBlockchainForDate(today),
+    }
+
+    // Return response as JSON
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(response)
+}
+
+// Handler for minting schedule on a specific date
+func GetMintingScheduleForDate(w http.ResponseWriter, r *http.Request) {
+    vars := mux.Vars(r)
+    dateStr := vars["date"]
+
+    // Parse date from query
+    date, err := time.Parse("2006-01-02", dateStr)
+    if err != nil {
+        http.Error(w, "Invalid date format. Use YYYY-MM-DD", http.StatusBadRequest)
+        return
+    }
+
+    response := MintingScheduleResponse{
+        Date:       date.Format("Jan 2, 2006"),
+        Blockchain: getBlockchainForDate(date),
+    }
+
+    // Return response as JSON
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(response)
+}
+
+// Handler for minting schedule for next week and the week after
+func GetMintingScheduleForNextWeek(w http.ResponseWriter, r *http.Request) {
+    today := time.Now()
+
+    // Next week
+    nextWeek := today.AddDate(0, 0, 7)
+    followingWeek := today.AddDate(0, 0, 14)
+
+    responses := []MintingScheduleResponse{
+        {
+            Date:       nextWeek.Format("Jan 2, 2006"),
+            Blockchain: getBlockchainForDate(nextWeek),
+        },
+        {
+            Date:       followingWeek.Format("Jan 9, 2006"),
+            Blockchain: getBlockchainForDate(followingWeek),
+        },
+    }
+
+    // Return response as JSON
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(responses)
+}
+```
+
+---
+
+### 4. **Examples of API Requests and Responses:**
+
+#### **1. Get today’s minting blockchain**
+- **GET** `/api/minting-schedule/today`
+
+**Response**:
+```json
+{
+  "date": "Oct 14, 2024",
+  "blockchain": "Blockchain 2"
+}
+```
+
+#### **2. Get minting blockchain for a specific date**
+- **GET** `/api/minting-schedule/2024-10-20`
+
+**Response**:
+```json
+{
+  "date": "Oct 20, 2024",
+  "blockchain": "Blockchain 4"
+}
+```
+
+#### **3. Get minting blockchain for next week and the following week**
+- **GET** `/api/minting-schedule/next-week`
+
+**Response**:
+```json
+[
+  {
+    "date": "Oct 21, 2024",
+    "blockchain": "Blockchain 4"
+  },
+  {
+    "date": "Oct 28, 2024",
+    "blockchain": "Blockchain 6"
+  }
+]
+```
+
+---
+
+### 5. **Deploying to Vercel or Netlify:**
+- **Vercel**: 
+  - Place your Go code in a directory called `api` in the root of your project. Vercel will automatically detect and deploy it as a serverless function.
+  - For example, place your code in `api/main.go` and deploy via Vercel CLI or GitHub integration.
+
+- **Netlify**: 
+  - Use the **Netlify Functions** feature to deploy your Go API. Make sure your Go files are placed in `netlify/functions/` and use the `netlify.toml` file to specify the functions directory.
+
+### 6. **Extending the API:**
+- **Integration with Supabase**: Store blockchain-specific details in Supabase for each minting event (e.g., transaction hash, success status).
+- **Notifications**: Add webhook or email notification integration to notify users when specific blockchains are minting.
+- **Caching with Redis**: Add Redis to cache minting schedules for faster querying.
+
+Near future mods: adding caching, blockchain-specific features, display integration with exotopia , wb1 nft aftermarket and eco ops project transparency portal
