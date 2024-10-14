@@ -2,13 +2,13 @@
   "builds": [
     {
       "src": "pages/api/main.rs",
-      "use": "@vercel/rust@0.8.0" 
+      "use": "@vercel/rust@latest"
     }
   ],
   "routes": [
     {
-      "src": "/api/(?<video_id>[^/]+)",  
-      "dest": "/api/main.rs"  
+      "src": "/api/(?<video_id>[^/]+)",
+      "dest": "/api/main.rs"
     },
     {
       "src": "/(.*)",
