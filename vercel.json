@@ -1,19 +1,14 @@
 {
   "builds": [
     {
-      "src": "pages/api/main.rs",
-      "use": "@vercel/rust@latest",
-      "config": {
-        "installCommand": "cargo install --locked --path .",
-        "buildCommand": "cargo build --release",
-        "devCommand": "cargo watch -x run"
-      }
+      "src": "pages/api/main.go",
+      "use": "@vercel/go"
     }
   ],
   "routes": [
     {
-      "src": "/api/(?<video_id>[^/]+)",
-      "dest": "/api/main.rs"
+      "src": "/api/(.*)",
+      "dest": "pages/api/main.go"
     },
     {
       "src": "/(.*)",
