@@ -1,14 +1,14 @@
 {
   "builds": [
     {
-      "src": "pages/api/main.rs", // Updated path
+      "src": "pages/api/main.rs",  
       "use": "@vercel/rust"
     }
   ],
   "routes": [
     {
-      "src": "/api/(?<video_id>[^/]+)", // Updated route
-      "dest": "/api/main.rs" // Updated destination
+      "src": "/api/(?<video_id>[^/]+)",  
+      "dest": "/api/main.rs"  
     },
     {
       "src": "/(.*)",
