@@ -3,22 +3,75 @@
 <head>
   <title>Approvideo</title>
   <script src="https://cdn.tailwindcss.com"></script> 
+  <style>
+    /* Form Container Styles */
+    .form-container {
+      max-width: 400px;
+      margin: 50px auto; 
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    /* Label Styles */
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    /* Input and Textarea Styles */
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      box-sizing: border-box;
+    }
+
+    /* Button Styles */
+    button {
+      background-color: #4CAF50; 
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    /* Message Styles */
+    #message {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
 
   <div class="container mx-auto p-8">
     <h1 class="text-3xl font-bold mb-6">Submit a Video</h1>
 
-    <form id="submit-video-form">
-      <input type="text" id="title" placeholder="Title" class="border rounded px-3 py-2 mb-4 w-full" required><br>
-      <textarea id="description" placeholder="Description" class="border rounded px-3 py-2 mb-4 w-full" required></textarea><br>
-      <input type="url" id="video-url" placeholder="Video URL" class="border rounded px-3 py-2 mb-4 w-full" required><br>
-      <input type="text" id="category" placeholder="Category" class="border rounded px-3 py-2 mb-4 w-full" required><br>
-      <input type="text" id="tags" placeholder="Tags (comma-separated)" class="border rounded px-3 py-2 mb-4 w-full" required><br>
-      <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Submit Video</button>
+    <form id="submit-video-form" class="form-container">
+      <label for="title">Title:</label>
+      <input type="text" id="title" name="title" required>
+
+      <label for="description">Description:</label>
+      <textarea id="description" name="description" required></textarea>
+
+      <label for="video-url">Video URL:</label>
+      <input type="url" id="video-url" name="video-url" required>
+
+      <label for="category">Category:</label>
+      <input type="text" id="category" name="category" required>
+
+      <label for="tags">Tags (comma-separated):</label>
+      <input type="text" id="tags" name="tags" required>
+
+      <button type="submit">Submit Video</button>
     </form>
 
-    <div id="message" class="mt-4"></div>
+    <div id="message" class="mt-4"></div> 
   </div>
 
   <script>
@@ -26,15 +79,16 @@
     const messageDiv = document.getElementById('message');
 
     form.addEventListener('submit', (event) => {
-      event.preventDefault();
+      event.preventDefault(); 
 
+      // Gather data from form fields
       const title = document.getElementById('title').value;
       const description = document.getElementById('description').value;
       const videoUrl = document.getElementById('video-url').value;
       const category = document.getElementById('category').value;
       const tags = document.getElementById('tags').value.split(',').map(tag => tag.trim());
 
-      // Replace with your actual API endpoint
+      // Send POST request to the API
       fetch('/api/submit', { 
         method: 'POST',
         headers: {
@@ -53,15 +107,19 @@
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
-        return response.json();
+        return response.json(); 
       })
       .then(data => {
+        // Display success message and reset the form
         messageDiv.textContent = data.message;
-        form.reset();
+        messageDiv.style.color = "green"; 
+        form.reset(); 
       })
       .catch(error => {
+        // Display error message
         console.error('Error submitting video:', error);
         messageDiv.textContent = 'Error submitting video. Please try again later.';
+        messageDiv.style.color = "red"; 
       });
     });
   </script>
