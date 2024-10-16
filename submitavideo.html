@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Approvideo</title>
+  <script src="https://cdn.tailwindcss.com"></script> 
+</head>
+<body>
+
+  <div class="container mx-auto p-8">
+    <h1 class="text-3xl font-bold mb-6">Submit a Video</h1>
+
+    <form id="submit-video-form">
+      <input type="text" id="title" placeholder="Title" class="border rounded px-3 py-2 mb-4 w-full" required><br>
+      <textarea id="description" placeholder="Description" class="border rounded px-3 py-2 mb-4 w-full" required></textarea><br>
+      <input type="url" id="video-url" placeholder="Video URL" class="border rounded px-3 py-2 mb-4 w-full" required><br>
+      <input type="text" id="category" placeholder="Category" class="border rounded px-3 py-2 mb-4 w-full" required><br>
+      <input type="text" id="tags" placeholder="Tags (comma-separated)" class="border rounded px-3 py-2 mb-4 w-full" required><br>
+      <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Submit Video</button>
+    </form>
+
+    <div id="message" class="mt-4"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('submit-video-form');
+    const messageDiv = document.getElementById('message');
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const title = document.getElementById('title').value;
+      const description = document.getElementById('description').value;
+      const videoUrl = document.getElementById('video-url').value;
+      const category = document.getElementById('category').value;
+      const tags = document.getElementById('tags').value.split(',').map(tag => tag.trim());
+
+      // Replace with your actual API endpoint
+      fetch('/api/submit', { 
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add any authentication headers if needed
+        },
+        body: JSON.stringify({ 
+          title: title,
+          description: description,
+          video_url: videoUrl,
+          category: category,
+          tags: tags
+        })
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        messageDiv.textContent = data.message;
+        form.reset();
+      })
+      .catch(error => {
+        console.error('Error submitting video:', error);
+        messageDiv.textContent = 'Error submitting video. Please try again later.';
+      });
+    });
+  </script>
+</body>
+</html>
